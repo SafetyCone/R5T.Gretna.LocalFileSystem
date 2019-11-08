@@ -1,0 +1,4 @@
+R5T.Gretna.LocalFileSystem.Construction - A construction console-app for the library R5T.Gretna.LocalFileSystem.
+
+Goals
+
