@@ -1,0 +1,2 @@
+# R5T.Gretna.LocalFileSystem
+An IImageFileRepository implementation using the local file-system for the Gretna project.
