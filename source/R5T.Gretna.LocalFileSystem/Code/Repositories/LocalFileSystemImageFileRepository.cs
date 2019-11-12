@@ -5,6 +5,7 @@ using R5T.Dufftown;
 using R5T.Francia;
 using R5T.Lockerbie;
 using R5T.Lombardy;
+using R5T.Magyar.IO;
 using R5T.Philippi;
 using R5T.Sparta;
 
@@ -31,6 +32,15 @@ namespace R5T.Gretna.LocalFileSystem
             this.LocalFileInfoRepository = localFileInfoRepository;
             this.StringlyTypedPathOperator = stringlyTypedPathOperator;
             this.OriginalFileNameMappingRepository = originalFileNameMappingRepository;
+
+            this.Setup();
+        }
+
+        private void Setup()
+        {
+            var rootDirectoryPath = this.RootDirectoryPathProvider.GetRootDirectoryPath();
+
+            DirectoryHelper.CreateDirectoryOkIfExists(rootDirectoryPath.Value);
         }
 
         public ImageFileIdentity AddImage(Stream imageFileStream, FileName imageFileName, FileFormat fileFormat)
