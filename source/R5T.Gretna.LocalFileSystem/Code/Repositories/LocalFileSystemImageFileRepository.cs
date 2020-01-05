@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 using R5T.Dufftown;
 using R5T.Francia;
@@ -43,7 +44,7 @@ namespace R5T.Gretna.LocalFileSystem
             DirectoryHelper.CreateDirectoryOkIfExists(rootDirectoryPath.Value);
         }
 
-        public ImageFileIdentity AddImage(Stream imageFileStream, FileName imageFileName, FileFormat fileFormat)
+        public async Task<ImageFileIdentity> AddImage(Stream imageFileStream, FileName imageFileName, FileFormat fileFormat)
         {
             var imageFileIdentity = ImageFileIdentity.New();
 
@@ -56,7 +57,7 @@ namespace R5T.Gretna.LocalFileSystem
             // Write the image file from its input stream to its unique local file path.
             using (var file = File.Open(uniqueImageFilePath.Value, FileMode.CreateNew)) // Throw an exception if the file already exists by using create-new.
             {
-                imageFileStream.CopyTo(file);
+                await imageFileStream.CopyToAsync(file);
             }
 
             // Add the file info to the repository.
@@ -69,10 +70,10 @@ namespace R5T.Gretna.LocalFileSystem
                 FileFormat = fileFormat,
             };
 
-            this.LocalFileInfoRepository.Add(fileInfo);
+            await this.LocalFileInfoRepository.Add(fileInfo);
 
             // Now add the unique file-name to original file-name mapping.
-            this.OriginalFileNameMappingRepository.Add(uniqueImageFileName, imageFileName);
+            await this.OriginalFileNameMappingRepository.Add(uniqueImageFileName, imageFileName);
 
             // Return the image file identity.
             return imageFileIdentity;
@@ -96,7 +97,7 @@ namespace R5T.Gretna.LocalFileSystem
             return uniqueImageFilePath;
         }
 
-        public void Delete(ImageFileIdentity imageFileIdentity)
+        public async Task Delete(ImageFileIdentity imageFileIdentity)
         {
             var uniqueImageFileName = imageFileIdentity.GetUniqueFileName();
             var uniqueImageFilePath = this.GetUniqueImageFilePath(uniqueImageFileName);
@@ -107,54 +108,58 @@ namespace R5T.Gretna.LocalFileSystem
             // Remove the local file info.
             var fileIdentity = imageFileIdentity.GetFileIdentity();
 
-            this.LocalFileInfoRepository.Delete(fileIdentity);
+            await this.LocalFileInfoRepository.Delete(fileIdentity);
 
             // Delete the original image name mapping.
 
-            this.OriginalFileNameMappingRepository.Delete(uniqueImageFileName);
+            await this.OriginalFileNameMappingRepository.Delete(uniqueImageFileName);
         }
 
-        public bool Exists(ImageFileIdentity imageFileIdentity)
+        public async Task<bool> Exists(ImageFileIdentity imageFileIdentity)
         {
             var fileIdentity = imageFileIdentity.GetFileIdentity();
 
-            var exists = this.LocalFileInfoRepository.Exists(fileIdentity);
+            var exists = await this.LocalFileInfoRepository.Exists(fileIdentity);
             return exists;
         }
 
-        public FileFormat GetImageFileFormat(ImageFileIdentity imageFileIdentity)
+        public async Task<FileFormat> GetImageFileFormat(ImageFileIdentity imageFileIdentity)
         {
             var fileIdentity = imageFileIdentity.GetFileIdentity();
 
-            var fileFormat = this.LocalFileInfoRepository.GetFileFormat(fileIdentity);
+            var fileFormat = await this.LocalFileInfoRepository.GetFileFormat(fileIdentity);
             return fileFormat;
         }
 
         /// <summary>
         /// This, in context, means the original image file name.
         /// </summary>
-        public FileName GetImageFileName(ImageFileIdentity imageFileIdentity)
+        public async Task<FileName> GetImageFileName(ImageFileIdentity imageFileIdentity)
         {
             // Can get the unique image file-name directly from the image file identity.
             var uniqueImageFileName = imageFileIdentity.GetUniqueFileName();
 
-            var originalImageFileName = this.OriginalFileNameMappingRepository.GetOriginalImageFileName(uniqueImageFileName);
+            var originalImageFileName = await this.OriginalFileNameMappingRepository.GetOriginalImageFileName(uniqueImageFileName);
             return originalImageFileName;
         }
 
-        public Stream GetImageFileStream(ImageFileIdentity imageFileIdentity)
+        public Task<Stream> GetImageFileStream(ImageFileIdentity imageFileIdentity)
         {
             var uniqueImageFilePath = this.GetUniqueImageFilePath(imageFileIdentity);
 
             var imageFileStream = File.OpenRead(uniqueImageFilePath.Value);
-            return imageFileStream;
+            return Task.FromResult<Stream>(imageFileStream);
         }
 
-        public ImageFileReadInfo GetReadInfo(ImageFileIdentity imageFileIdentity)
+        public async Task<ImageFileReadInfo> GetReadInfo(ImageFileIdentity imageFileIdentity)
         {
-            var imageFileStream = this.GetImageFileStream(imageFileIdentity);
-            var originalImageFileName = this.GetImageFileName(imageFileIdentity);
-            var imageFileFormat = this.GetImageFileFormat(imageFileIdentity);
+            var getImageFileStream = this.GetImageFileStream(imageFileIdentity);
+            var getImageFileName = this.GetImageFileName(imageFileIdentity);
+            var getImageFileFormat = this.GetImageFileFormat(imageFileIdentity);
+
+            var imageFileStream = await getImageFileStream;
+            var originalImageFileName = await getImageFileName;
+            var imageFileFormat = await getImageFileFormat;
 
             var readInfo = new ImageFileReadInfo()
             {
