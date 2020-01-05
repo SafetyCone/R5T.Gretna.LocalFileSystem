@@ -102,8 +102,11 @@ namespace R5T.Gretna.LocalFileSystem
             var uniqueImageFileName = imageFileIdentity.GetUniqueFileName();
             var uniqueImageFilePath = this.GetUniqueImageFilePath(uniqueImageFileName);
 
+            // The multiple tasks are sequentially awaited to allow failures to preserve the sequence of events in case of failure.
+            // (The alternative would have been to Task.WhenAll() the various tasks, which would be simultaneous, but would lead to situations where things might get out of whack in case of failure.)
+
             // Delete the image file.
-            File.Delete(uniqueImageFilePath.Value);
+            await FileHelper.DeleteAsync(uniqueImageFilePath.Value);
 
             // Remove the local file info.
             var fileIdentity = imageFileIdentity.GetFileIdentity();
