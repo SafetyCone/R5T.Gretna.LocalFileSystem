@@ -17,22 +17,22 @@ namespace R5T.Gretna.LocalFileSystem
 {
     public class LocalFileSystemImageFileRepository : IImageFileRepository
     {
-        private IRootDirectoryPathProvider RootDirectoryPathProvider { get; }
         private ILocalFileInfoRepository LocalFileInfoRepository { get; }
-        private IStringlyTypedPathOperator StringlyTypedPathOperator { get; }
         private IOriginalFileNameMappingRepository OriginalFileNameMappingRepository { get; }
+        private IRootDirectoryPathProvider RootDirectoryPathProvider { get; }
+        private IStringlyTypedPathOperator StringlyTypedPathOperator { get; }
 
 
         public LocalFileSystemImageFileRepository(
-            IRootDirectoryPathProvider rootDirectoryPathProvider,
             ILocalFileInfoRepository localFileInfoRepository,
-            IStringlyTypedPathOperator stringlyTypedPathOperator,
-            IOriginalFileNameMappingRepository originalFileNameMappingRepository)
+            IOriginalFileNameMappingRepository originalFileNameMappingRepository,
+            IRootDirectoryPathProvider rootDirectoryPathProvider,
+            IStringlyTypedPathOperator stringlyTypedPathOperator)
         {
-            this.RootDirectoryPathProvider = rootDirectoryPathProvider;
             this.LocalFileInfoRepository = localFileInfoRepository;
-            this.StringlyTypedPathOperator = stringlyTypedPathOperator;
             this.OriginalFileNameMappingRepository = originalFileNameMappingRepository;
+            this.RootDirectoryPathProvider = rootDirectoryPathProvider;
+            this.StringlyTypedPathOperator = stringlyTypedPathOperator;
 
             this.Setup();
         }
