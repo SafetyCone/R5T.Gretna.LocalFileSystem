@@ -149,7 +149,12 @@ namespace R5T.Gretna.LocalFileSystem
         public Task<Stream> GetImageFileStream(ImageFileIdentity imageFileIdentity)
         {
             var uniqueImageFilePath = this.GetUniqueImageFilePath(imageFileIdentity);
-
+            // For times when the file doesn't exist (particularly common in dev, but happens in prod too)
+            // return a null stream. And hope for the best from there.
+            if (!File.Exists(uniqueImageFilePath.Value))
+            {
+                return Task.FromResult<Stream>(Stream.Null);
+            }
             var imageFileStream = File.OpenRead(uniqueImageFilePath.Value);
             return Task.FromResult<Stream>(imageFileStream);
         }
