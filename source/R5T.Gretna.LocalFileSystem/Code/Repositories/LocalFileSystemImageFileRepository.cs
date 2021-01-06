@@ -179,5 +179,16 @@ namespace R5T.Gretna.LocalFileSystem
 
             return readInfo;
         }
+
+        public async Task SetImageData(ImageFileIdentity imageFileIdentity, Stream imageFileStream)
+        {
+            var uniqueImageFilePath = this.GetUniqueImageFilePath(imageFileIdentity);
+
+            // Overwrite.
+            using (var file = File.OpenWrite(uniqueImageFilePath.Value))
+            {
+                await imageFileStream.CopyToAsync(file);
+            }
+        }
     }
 }
